@@ -1,0 +1,13 @@
+{
+  "name": "alert-triage-demo-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "alert-platform": "bin/alert-platform.js"
+  },
+  "dependencies": {
+    "@chaitin-ai/octobus-sdk": "0.6.2"
+  }
+}
+

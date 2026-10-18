@@ -1,0 +1,11 @@
+{
+  "version":"1.1.0",
+  "priority_order":["critical","high","medium","low","info"],
+  "mapping":[
+    {"source":"synthetic-demo-risk-policy","confidence":0.99,"features":["external_source","production","privileged_login","database_export"],
+      "applicable_conditions":["R004 confirmed"],"severity":"critical","exceptions":["missing_time_correlation"]},
+    {"source":"synthetic-demo-probe-register","confidence":0.9,"features":["internal_probe","allowlisted_signature","maintenance_window"],
+      "applicable_conditions":["R003 confirmed"],"severity":"low","exceptions":["critical_production_asset"]}
+  ]
+}
+

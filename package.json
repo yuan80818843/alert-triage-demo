@@ -1,0 +1,12 @@
+{
+  "name": "alert-triage-demo-checks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Demo-owned report acceptance checks, not a replacement platform runtime",
+  "scripts": { "test": "node --test tests/*.test.mjs" },
+  "dependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1"
+  }
+}

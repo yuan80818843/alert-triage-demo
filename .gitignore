@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+logs/
+data/
+node_modules/
+__pycache__/
+*.pyc
+reports/
+*.log
+octobus-data/
+agent-compose-data/
+agent-compose-data-*/
+

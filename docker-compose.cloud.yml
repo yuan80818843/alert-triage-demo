@@ -1,0 +1,11 @@
+# Cloud fallback for hosts where Docker Hub is unreachable.
+# mock-upstream is run as a host Node process; only official GHCR services
+# are started by the cloud command. Keep published control-plane ports local.
+services:
+  octobus:
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+
+  agent-compose:
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"

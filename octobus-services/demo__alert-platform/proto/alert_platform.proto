@@ -1,0 +1,161 @@
+syntax = "proto3";
+
+package alert_triage.v1;
+
+import "google/protobuf/struct.proto";
+
+service AlertPlatformService {
+  rpc ListAlerts(ListAlertsRequest) returns (ListAlertsResponse);
+  rpc GetAlertDetail(GetAlertDetailRequest) returns (GetAlertDetailResponse);
+  rpc QueryEvidence(QueryEvidenceRequest) returns (QueryEvidenceResponse);
+  rpc SearchSimilarCases(SearchSimilarCasesRequest) returns (SearchSimilarCasesResponse);
+  rpc CreateDisposition(CreateDispositionRequest) returns (CreateDispositionResponse);
+}
+
+message ListAlertsRequest {
+  string start_time = 1;
+  string end_time = 2;
+  string source_class = 3;
+  string severity = 4;
+  string status = 5;
+  string asset_id = 6;
+  int32 page_size = 7;
+  string page_token = 8;
+}
+
+message ListAlertsResponse {
+  repeated AlertSummary alerts = 1;
+  string next_page_token = 2;
+  string query_time = 3;
+  int32 total = 4;
+}
+
+message AlertSummary {
+  string alert_id = 1;
+  string title = 2;
+  string severity = 3;
+  string status = 4;
+  string source_class = 5;
+  string asset_id = 6;
+  string first_seen = 7;
+  string last_seen = 8;
+  string correlation_id = 9;
+  string signature = 10;
+  string fingerprint = 11;
+  int32 duplicate_count = 12;
+  repeated string group_member_ids = 13;
+}
+
+message GetAlertDetailRequest {
+  string alert_id = 1;
+  bool include_related_assets = 2;
+}
+
+message GetAlertDetailResponse {
+  AlertDetail alert = 1;
+  repeated string related_asset_ids = 2;
+}
+
+message AlertDetail {
+  string alert_id = 1;
+  string title = 2;
+  string description = 3;
+  string severity = 4;
+  string status = 5;
+  string source_class = 6;
+  string source = 7;
+  string probe_id = 8;
+  string signature = 9;
+  string asset_id = 10;
+  int32 asset_criticality = 11;
+  string environment = 12;
+  string first_seen = 13;
+  string last_seen = 14;
+  string correlation_id = 15;
+  repeated string evidence_refs = 16;
+  google.protobuf.Struct facts = 17;
+}
+
+message QueryEvidenceRequest {
+  string alert_id = 1;
+  repeated string evidence_types = 2;
+  string start_time = 3;
+  string end_time = 4;
+  string correlation_id = 5;
+  int32 limit = 6;
+}
+
+message QueryEvidenceResponse {
+  repeated Evidence evidence = 1;
+  bool complete = 2;
+  repeated string missing_types = 3;
+  string evaluated_at = 4;
+  string recommended_classification = 5;
+  double confidence_ceiling = 6;
+  repeated string rule_hits = 7;
+  bool human_review_required = 8;
+  bool auto_close_allowed = 9;
+  string evaluation_mode = 10;
+  string knowledge_version = 11;
+  string recommended_severity = 12;
+}
+
+message Evidence {
+  string evidence_id = 1;
+  string source_service = 2;
+  string source_instance = 3;
+  string method = 4;
+  string kind = 5;
+  string observed_at = 6;
+  string subject = 7;
+  string fact = 8;
+  string integrity = 9;
+  string correlation_id = 10;
+  string alert_id = 11;
+  google.protobuf.Struct facts = 12;
+}
+
+message SearchSimilarCasesRequest {
+  string alert_id = 1;
+  string source_class = 2;
+  string signature = 3;
+  string environment = 4;
+  int32 limit = 5;
+}
+
+message SearchSimilarCasesResponse {
+  repeated SimilarCase cases = 1;
+}
+
+message SimilarCase {
+  string case_id = 1;
+  string source = 2;
+  double confidence = 3;
+  string decision = 4;
+  string disposition = 5;
+  repeated string matched_features = 6;
+  repeated string applicable_conditions = 7;
+  repeated string exceptions = 8;
+}
+
+message CreateDispositionRequest {
+  string alert_id = 1;
+  string classification = 2;
+  double confidence = 3;
+  repeated string evidence_ids = 4;
+  repeated string missing_evidence = 5;
+  repeated string next_actions = 6;
+  string proposed_disposition = 7;
+  string human_approval_id = 8;
+  string approved_by = 9;
+  string approved_at = 10;
+  string idempotency_key = 11;
+}
+
+message CreateDispositionResponse {
+  string disposition_id = 1;
+  string status = 2;
+  string recorded_at = 3;
+  string audit_ref = 4;
+}
+

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alert Triage Demo</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <h1>告警研判与降噪</h1>
+    <p class="hint">轻量人工复核控制台。Agent 仍通过 agent-compose → capproxy → OctoBus 访问只读能力；浏览器不持有写入权限。</p>
+    <section class="panel reports-panel">
+      <h2>研判报告</h2>
+      <div id="reports">加载中…</div>
+      <article id="report-detail" class="report-detail">请选择一份报告</article>
+    </section>
+    <section class="grid">
+      <div><h2>告警</h2><div id="alerts">加载中…</div></div>
+      <div><h2>证据链</h2><pre id="evidence">请选择告警</pre></div>
+      <div><h2>相似案例</h2><pre id="cases">请选择告警</pre></div>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,14 @@
+{
+  "schema": "chaitin.octobus.service.v1",
+  "name": "alert-platform",
+  "displayName": "Alert Triage Demo Platform",
+  "description": "Evidence-backed alert triage service for the interview demo.",
+  "runtime": {"mode": "long-running"},
+  "proto": {
+    "roots": ["proto"],
+    "files": ["proto/alert_platform.proto"]
+  },
+  "configSchema": "config.schema.json",
+  "secretSchema": "secret.schema.json"
+}
+

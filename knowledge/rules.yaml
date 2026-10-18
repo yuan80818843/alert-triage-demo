@@ -1,0 +1,32 @@
+{
+  "version": "1.1.0",
+  "format": "JSON-compatible YAML 1.2; executable, no custom YAML parser",
+  "trusted_sources": {
+    "alert_detail": ["mock-xdr", "mock-scanner", "mock-sensor", "legacy-sensor"],
+    "asset_identity": ["mock-assets", "mock-cmdb"],
+    "source_classification": ["mock-xdr", "mock-probe", "mock-sensor", "legacy-sensor"],
+    "behavior_log": ["mock-auth", "mock-db", "mock-change"],
+    "db_anomaly": ["mock-db"],
+    "time_correlation": ["mock-correlation"]
+  },
+  "rules": [
+    {"id":"R001","name":"evidence-completeness-gate","source":"synthetic-demo-soc-handbook","confidence":1.0,"confidence_ceiling":0.59,
+      "required_evidence":["alert_detail","asset_identity","source_classification","behavior_log","time_correlation"],
+      "applicable_conditions":["required verified kinds and rule-specific facts must be present","partial evidence queries cannot imply safety"],"exceptions":["none"],"action":"INSUFFICIENT_EVIDENCE; REQUEST_MORE_EVIDENCE"},
+    {"id":"R002","name":"duplicate-alert-grouping","source":"synthetic-demo-soc-handbook","confidence":0.96,"window_minutes":10,"min_count":3,
+      "applicable_conditions":["same exact asset/signature/source class/subject","entire group span <=10m","at least 3 alerts","all exception flags explicitly false"],
+      "exceptions":["successful_auth","privilege_change","new_external_source","missing identity or exception flags"],"action":"keep highest severity; preserve member IDs; never close"},
+    {"id":"R003","name":"internal-probe-noise","source":"synthetic-demo-probe-register","confidence":0.91,"confidence_ceiling":0.91,
+      "applicable_conditions":["registered probe/signature/environment","asset and full observation span inside approved change window","auth and database sources explicitly confirm complete negative observations"],
+      "exceptions":["critical_production_asset","unknown_signature","successful_auth","database_anomaly","database_export","privilege_change"],"action":"SUSPECTED_FALSE_POSITIVE; HOLD_FOR_REVIEW; human review required"},
+    {"id":"R004","name":"external-source-db-anomaly","source":"synthetic-demo-incident-review","confidence":0.94,"confidence_ceiling":0.94,"window_minutes":10,"min_export_bytes":10737418240,
+      "applicable_conditions":["EXTERNAL confirmed by trusted source","successful auth then verified bulk export >10GiB or privilege change","auth/anomaly/correlation share ID and span <=10m"],
+      "exceptions":["missing correlation","invalid ordering","stale/conflicting evidence"],"action":"REAL_ATTACK; ESCALATE_FOR_HUMAN_REVIEW"},
+    {"id":"R005","name":"critical-asset-human-gate","source":"synthetic-demo-risk-policy","confidence":1.0,"criticality_min":4,
+      "applicable_conditions":["asset_criticality>=4","environment=production"],"exceptions":["none"],"action":"human review required; never auto-close"},
+    {"id":"R006","name":"stale-or-conflicting-evidence","source":"synthetic-demo-evidence-policy","confidence":0.99,"confidence_ceiling":0.59,"max_age_hours":24,
+      "applicable_conditions":["age>24h","future or invalid timestamp","unverified integrity or untrusted source","same assertion_id conflicts","evidence belongs to another alert/correlation"],
+      "exceptions":["explicit fresh verified replacement from same source/instance/kind/subject/assertion_id"],"action":"INSUFFICIENT_EVIDENCE; REQUEST_MORE_EVIDENCE"}
+  ]
+}
+

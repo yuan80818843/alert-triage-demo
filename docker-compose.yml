@@ -1,0 +1,85 @@
+services:
+  mock-upstream:
+    build: ./mock-upstream
+    container_name: alert-triage-mock-upstream
+    environment:
+      PORT: 8080
+      BIND_HOST: 0.0.0.0
+    expose:
+      - "8080"
+    ports:
+      - "127.0.0.1:${MOCK_UPSTREAM_PORT:-8081}:8080"
+    volumes:
+      - ./mock-upstream/fixtures:/app/fixtures:ro
+      - ./logs:/app/data
+    restart: unless-stopped
+
+  octobus:
+    image: ${OCTOBUS_IMAGE:-ghcr.io/chaitin/octobus@sha256:377409360a3d54f8e058340a7fb4874a994f18d11d35ba8f7cae0bec23a724a6}
+    container_name: alert-triage-octobus
+    environment:
+      OCTOBUS_BOOTSTRAP_ADMIN_TOKEN: ${OCTOBUS_ADMIN_TOKEN:?set OCTOBUS_ADMIN_TOKEN in .env}
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - octobus-data:/var/lib/octobus
+      - ./octobus-services:/opt/alert-triage/services:ro
+    restart: unless-stopped
+
+  agent-compose:
+    image: ${AGENT_COMPOSE_IMAGE:-chaitin/agent-compose:sha-70bfd0b}
+    container_name: alert-triage-agent-compose
+    working_dir: /data/work
+    environment:
+      AGENT_COMPOSE_RUNTIME_BASE_URL: http://agent-compose:7410
+      AGENT_COMPOSE_AUTH_TOKEN: ${AGENT_COMPOSE_AUTH_TOKEN:?set AGENT_COMPOSE_AUTH_TOKEN in .env}
+      CAP_GRPC_LISTEN: 0.0.0.0:7411
+      CAP_GRPC_TARGET: agent-compose:7411
+      SCHEDULER_RUN_TIMEOUT: ${SCHEDULER_RUN_TIMEOUT:-10m}
+      AGENT_MAX_CONCURRENCY: ${AGENT_MAX_CONCURRENCY:-1}
+      EGRESS_UNENFORCEABLE_POLICY: refuse
+      DEFAULT_IMAGE: ${AGENT_COMPOSE_GUEST_IMAGE:-chaitin/agent-compose-guest:sha-70bfd0b}
+    networks:
+      - sandbox
+      - default
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${AGENT_COMPOSE_DATA_DIR:-./agent-compose-data}:/data
+      - ./agent-compose.yml:/data/work/agent-compose.yml:ro
+      - ./agent:/data/work/agent:ro
+      - ./knowledge:/data/work/knowledge:ro
+      - ./logs:/data/work/logs
+    ports:
+      - "127.0.0.1:${AGENT_COMPOSE_PORT:-7410}:7410"
+    depends_on:
+      - octobus
+    restart: unless-stopped
+
+  guest-image:
+    image: ${AGENT_COMPOSE_GUEST_IMAGE:-chaitin/agent-compose-guest:sha-70bfd0b}
+    command: ["true"]
+    profiles: ["images"]
+    restart: "no"
+
+  frontend:
+    image: nginx:1.27-alpine
+    container_name: alert-triage-frontend
+    ports:
+      - "${FRONTEND_BIND_HOST:-127.0.0.1}:${FRONTEND_PORT:-8080}:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - mock-upstream
+    restart: unless-stopped
+
+volumes:
+  octobus-data:
+
+networks:
+  sandbox:
+    # Upstream Docker driver selects the alphabetically first named network.
+    # Verify the guest's actual attachment after each upstream upgrade.
+    name: ${COMPOSE_PROJECT_NAME:-alert-triage-demo}-00-sandbox
+    internal: true
+

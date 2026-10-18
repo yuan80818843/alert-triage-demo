@@ -1,0 +1,26 @@
+[Unit]
+Description=Alert triage read-only report acceptance observer
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+User=ecs-user
+SupplementaryGroups=docker
+WorkingDirectory=/home/ecs-user/alert-triage-demo
+Environment=TRIAGE_DOCKER_DIRECT=1
+Environment=TRIAGE_COLLECT_INTERVAL_MS=15000
+Environment=TRIAGE_COLLECT_LOOKBACK_MS=600000
+ExecStart=/usr/bin/flock -n /home/ecs-user/alert-triage-demo/reports/.observer.lock /usr/bin/node scripts/watch-agent-reports.mjs
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ecs-user/alert-triage-demo/reports
+InaccessiblePaths=/home/ecs-user/.ssh /home/ecs-user/alert-triage-demo/.env
+
+[Install]
+WantedBy=multi-user.target

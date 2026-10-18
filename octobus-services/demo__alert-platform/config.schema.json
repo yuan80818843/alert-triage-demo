@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "upstreamBaseUrl": {"type": "string", "format": "uri", "default": "http://mock-upstream:8080"},
+    "timeoutMs": {"type": "integer", "minimum": 100, "maximum": 30000, "default": 3000},
+    "maxPageSize": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20},
+    "maxGroupingPages": {"type": "integer", "minimum": 1, "maximum": 100, "default": 10},
+    "evaluationTime": {"type": "string", "format": "date-time", "description": "Optional, synthetic replay only. Omit to use the real current time."}
+  }
+}
+

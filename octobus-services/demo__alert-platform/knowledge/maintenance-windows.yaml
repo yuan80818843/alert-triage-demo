@@ -1,0 +1,8 @@
+{
+  "version":"1.1.0",
+  "windows":[{"window_id":"MW-2026-001","source":"synthetic-demo-change-system","ticket_id":"CHG-2026-001","asset_id":"asset-staging-01",
+    "start":"2026-10-18T01:00:00Z","end":"2026-10-18T03:00:00Z","purpose":"scheduled_internal_probe","confidence":0.98,
+    "applicable_conditions":["matching approved ticket","same asset","full alert/evidence span inside inclusive window"],
+    "exceptions":["successful_auth","database_export","privilege_change"]}]
+}
+

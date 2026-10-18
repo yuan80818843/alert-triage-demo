@@ -1,0 +1,22 @@
+[Unit]
+Description=Alert triage synthetic mock upstream
+After=docker.service network.target
+Requires=docker.service
+
+[Service]
+User=ecs-user
+WorkingDirectory=/home/ecs-user/alert-triage-demo
+Environment=PORT=8081
+Environment=BIND_HOST=172.17.0.1
+Environment=AUDIT_LOG_PATH=/home/ecs-user/alert-triage-demo/logs/audit.log
+ExecStart=/usr/bin/node mock-upstream/server.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ecs-user/alert-triage-demo/logs
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,62 @@
+name: alert-triage-demo
+
+agents:
+  triage:
+    provider: codex
+    model: deepseek-v4-flash
+    system_prompt: |
+      You are the Alert Triage Agent. Work only with evidence returned by the
+      selected OctoBus capabilities. Never guess, invent evidence, close an
+      alert, or call a write capability. Your final response must be one JSON
+      object for one alert matching output-schema.json in the workspace root, with classification,
+      confidence, evidence_chain, missing_evidence, next_actions, rule_hits,
+      human_review_required, and proposed_disposition. Every evidence_id and
+      case_id must exist in the current tool responses. Evidence insufficiency,
+      conflict, stale timestamps, critical production assets, and unknown probe
+      signatures require human review. Use UTC timestamps in the report.
+      Read capabilities.md for the supported tool invocation procedure.
+      Never dump environment variables or print any token, key or credential.
+      Copy each evidence fact and provenance exactly from tool responses;
+      put your interpretation only in explanation and next_actions.
+      proposed_disposition must be ESCALATE_FOR_HUMAN_REVIEW for REAL_ATTACK,
+      HOLD_FOR_REVIEW for SUSPECTED_FALSE_POSITIVE, and REQUEST_MORE_EVIDENCE
+      for INSUFFICIENT_EVIDENCE. A proposed action never executes a write.
+      Copy run_id exactly from read-alert.py run_context.run_id; do not invent it.
+    image: chaitin/agent-compose-guest:sha-70bfd0b
+    workspace:
+      provider: file
+      path: ./agent
+    capset_ids:
+      - triage-read
+    policy:
+      network:
+        default: deny
+        allow:
+          - host: agent-compose
+            port: 7411
+            protocol: tcp
+    scheduler:
+      # Interview mode: user approved one-minute polling and model usage cost.
+      enabled: true
+      sandbox_policy: new
+      concurrency_policy: skip
+      run_timeout: 10m
+      triggers:
+        - name: alert-poll
+          interval: 1m
+          prompt: >-
+            Process one alert from ListAlerts(pageSize=1). Call GetAlertDetail,
+            QueryEvidence, and SearchSimilarCases for that alert. Follow the
+            code-gate recommendation, confidence ceiling, missing types, rule
+            hits and human-review flag returned by QueryEvidence. Return one
+            object matching output-schema.json, strict JSON only.
+          sandbox_policy: new
+        - name: alert-event
+          event:
+            topic: security.alert.created
+          include_event: true
+          prompt: >-
+            Investigate the event alert using read-only capabilities and
+            return strict JSON only.
+          sandbox_policy: new
+

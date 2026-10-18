@@ -1,0 +1,7 @@
+{
+  "version":"1.1.0",
+  "probes":[{"probe_id":"probe-internal-001","source":"synthetic-demo-probe-register","signature":"internal-vuln-scan-v3",
+    "environments":["test","staging","production"],"confidence":0.95,
+    "applicable_conditions":["exact probe_id/signature/environment match","verified probe evidence"],"exceptions":["critical_production_asset","unknown_signature"]}]
+}
+

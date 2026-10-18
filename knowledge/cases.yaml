@@ -1,0 +1,31 @@
+version: "1.0.0"
+cases:
+  - case_id: CASE-001
+    source: synthetic-demo-incident-review
+    confidence: 0.94
+    applicable_conditions: [external_source, production_asset, privileged_login, bulk_export, correlated_time_window]
+    exceptions: [missing_correlation]
+    decision: REAL_ATTACK
+    disposition: ESCALATE
+  - case_id: CASE-002
+    source: synthetic-demo-probe-register
+    confidence: 0.91
+    applicable_conditions: [internal_probe, allowlisted_signature, maintenance_window, no_auth_success, no_db_anomaly]
+    exceptions: [critical_asset, unknown_signature]
+    decision: SUSPECTED_FALSE_POSITIVE
+    disposition: SUPPRESS_PENDING_REVIEW
+  - case_id: CASE-003
+    source: synthetic-demo-postmortem
+    confidence: 0.88
+    applicable_conditions: [low_severity_scan, later_privileged_login, later_privilege_grant]
+    exceptions: [none]
+    decision: REAL_ATTACK
+    disposition: ESCALATE_AND_RETAIN_HISTORY
+  - case_id: CASE-004
+    source: synthetic-demo-evidence-policy
+    confidence: 1.0
+    applicable_conditions: [alert_present, asset_missing, behavior_log_missing]
+    exceptions: [none]
+    decision: INSUFFICIENT_EVIDENCE
+    disposition: REQUEST_MORE_EVIDENCE
+
